@@ -8,7 +8,7 @@ module.exports = {
 	],
 	output: {
 		path: path.resolve( __dirname, 'dist' ),
-		filename: 'SSAPI.min.js',
+		filename: 'ssapi-wrapper.min.js',
 		library: 'SSAPI',
 		libraryTarget: 'umd',
 		globalObject: 'this'

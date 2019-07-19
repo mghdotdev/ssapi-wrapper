@@ -1,7 +1,7 @@
 {
 	"name": "ssapi-wrapper",
 	"version": "0.1.0",
-	"main": "./dist/SSAPI.min.js",
+	"main": "./dist/ssapi-wrapper.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --config webpack.prod.js",
