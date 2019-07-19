@@ -10,7 +10,8 @@ module.exports = {
 		path: path.resolve( __dirname, 'dist' ),
 		filename: 'SSAPI.min.js',
 		library: 'SSAPI',
-		libraryTarget: 'umd'
+		libraryTarget: 'umd',
+		globalObject: 'this'
 	},
 	module: {
 		rules: [
