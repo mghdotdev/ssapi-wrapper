@@ -1,11 +1,10 @@
-import axios from 'axios'
-import { throttleAdapterEnhancer } from 'axios-extensions'
 import qs from 'qs'
+import RequestCache from './RequestCache'
 
-const THROTTLE_MS = 30000;
-const http = axios.create({
-	adapter: throttleAdapterEnhancer( axios.defaults.adapter, { threshold: THROTTLE_MS } )
-});
+const DONE = 4;
+const OK = 200;
+
+const cache = new RequestCache( 30000 );
 
 class Request {
 
@@ -15,36 +14,69 @@ class Request {
 		this.params = params;
 	}
 
+	serializeParams( params ) {
+		return qs.stringify( params, { arrayFormat: 'repeat' } )
+	}
+
+	buildUrl( endpoint, params ) {
+		if ( endpoint.indexOf( '?' ) > -1 ) {
+			return `${ endpoint }${ params }`;
+		}
+		else {
+			return `${ endpoint }?${ params }`;
+		}
+	}
+
 	send() {
 
-		return http({
-			url: this.endpoint,
-			method: this.method,
-			params: { ...this.params },
-			paramsSerializer: ( params ) => {
-				return qs.stringify( params, { arrayFormat: 'repeat' } );
-			},
-			responseType: 'json'
-		})
-		.then(( response ) => {
+		return new Promise(( resolve, reject ) => {
 
-			if ( response ) {
+			const queryString = this.serializeParams( { ...this.params } );
+			const url = this.buildUrl( this.endpoint, queryString );
 
-				return { response: response, requestParams: this.params };
-
-			}
-			else {
-
-				console.error( `[SSAPI][Request].send - Error with response.`, response );
-
-				return {};
-
+			const cacheResponse = cache.access( url );
+			if ( cacheResponse != undefined ) {
+				return resolve( cacheResponse );
 			}
 
-		})
-		.catch(( error ) => {
+			const xhr = new XMLHttpRequest();
+			xhr.open( 'GET', url );
+			xhr.responseType = 'json';
+			xhr.send();
 
-			console.error( `[SSAPI][Request].send - Error! ${ error }` );
+			xhr.onreadystatechange = () => {
+
+				if ( xhr.readyState == DONE ) {
+
+					if ( xhr.status == OK ) {
+
+						const returnObject = {
+							response: {
+								status: xhr.status,
+								responseURL: xhr.responseURL,
+								responseType: xhr.responseType,
+								data: ( typeof xhr.response == 'object' ) ? xhr.response : JSON.parse( xhr.response )
+							},
+							requestParams: { ...this.params },
+							requestQueryString: queryString
+						};
+
+						cache.insert( url, returnObject );
+
+						resolve( returnObject );
+
+					}
+					else {
+
+						console.error( `[SSAPI][Request].send - Error with response.`, `Code: ${ xhr.status }.` );
+
+						reject( xhr );
+
+					}
+
+				}
+
+			};
 
 		});
 
