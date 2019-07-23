@@ -28,9 +28,9 @@ class Request {
 		})
 		.then(( response ) => {
 
-			if ( response && response.status == 200 ) {
+			if ( response ) {
 
-				return response.data;
+				return { response: response, requestParams: this.params };
 
 			}
 			else {

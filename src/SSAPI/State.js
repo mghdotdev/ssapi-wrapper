@@ -79,8 +79,6 @@ class State {
 
 	addFilter( field, value, backgroundFilter = false ) {
 
-		console.log( 'addedValue', value );
-
 		if ( field == undefined ) {
 			throw new TypeError( '[SSAPI][State].addFilter - `field` is undefined.' );
 		}

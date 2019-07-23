@@ -17,7 +17,6 @@ class Client {
 
 		this.endpoint = 'https://api.searchspring.net/api/search/search.json';
 		this.method = 'GET';
-		this.data = {};
 		this.events = {
 			[ EVENTS.SEARCH ]: () => {}
 		};
@@ -26,17 +25,15 @@ class Client {
 
 	async search() {
 
-		const response = await new Request(
+		const request = await new Request(
 			this.endpoint,
 			this.method,
 			this.state.output()
 		).send();
 
-		this.data = response;
+		this.events[ EVENTS.SEARCH ]( request.response.data, request.response, request.requestParams );
 
-		this.events[ EVENTS.SEARCH ]( response );
-
-		return response;
+		return request;
 
 	}
 
