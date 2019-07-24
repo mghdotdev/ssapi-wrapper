@@ -30,14 +30,6 @@ module.exports = {
 									}
 								}
 							]
-						],
-						plugins: [
-							['@babel/plugin-transform-regenerator', {
-								asyncGenerators: false,
-								generators: false,
-								async: true
-							}]
-							
 						]
 					}
 				}

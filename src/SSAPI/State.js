@@ -7,24 +7,24 @@ class State {
 	constructor( siteId, passedDefaultParams = {} ) {
 
 		this.siteId = siteId;
-		this.setDefault( passedDefaultParams );
+		this.defaultParams = { siteId: this.siteId, ...DEFAULT_PARAMS, ...passedDefaultParams };
 		this.params = { ...this.defaultParams };
 		this.filters = [];
 		this.sorting = {};
 
 	}
 
-	compareFilterRanges( range1, range2 ) {
+	_compareFilterRanges( range1, range2 ) {
 		return ( range1[ 0 ] == range2[ 0 ] && range1[ 1 ] == range2[ 1 ] );
 	}
 
-	compareFilterValues( value1, value2 ) {
+	_compareFilterValues( value1, value2 ) {
 
 		const arrayCheck1 = Array.isArray( value1 );
 		const arrayCheck2 = Array.isArray( value2 );
 
 		if ( arrayCheck1 && arrayCheck2 ) {
-			return this.compareFilterRanges( value1, value2 );
+			return this._compareFilterRanges( value1, value2 );
 		}
 		else if ( arrayCheck1 || arrayCheck2 ) {
 			return false;
@@ -35,7 +35,7 @@ class State {
 
 	}
 
-	outputFilters() {
+	_outputFilters() {
 
 		return this.filters.reduce(( output, filter ) => {
 
@@ -59,7 +59,7 @@ class State {
 
 	}
 
-	outputSort() {
+	_outputSort() {
 
 		if ( this.sorting.field && this.sorting.direction ) {
 
@@ -71,7 +71,7 @@ class State {
 
 	}
 
-	transformFilterType( backgroundFilter ) {
+	_transformFilterType( backgroundFilter ) {
 		return ( backgroundFilter ) ?
 			'bgfilter' :
 			'filter';
@@ -89,7 +89,7 @@ class State {
 		const filter = {
 			field: field,
 			value: value,
-			type: this.transformFilterType( backgroundFilter )
+			type: this._transformFilterType( backgroundFilter )
 		};
 
 		this.filters.push( filter );
@@ -107,13 +107,13 @@ class State {
 			throw new TypeError( '[SSAPI][State].removeFilter - `value` is undefined.' );
 		}
 
-		const type = this.transformFilterType( backgroundFilter );
+		const type = this._transformFilterType( backgroundFilter );
 
 		this.filters = this.filters.filter(( filter ) => {
 			return !(
 				filter.field == field &&
 				filter.type == type &&
-				this.compareFilterValues( filter.value, value )
+				this._compareFilterValues( filter.value, value )
 			);
 		});
 
@@ -130,13 +130,13 @@ class State {
 			throw new TypeError( '[SSAPI][State].toggleFilter - `value` is undefined.' );
 		}
 
-		const type = this.transformFilterType( backgroundFilter );
+		const type = this._transformFilterType( backgroundFilter );
 
 		const foundFilter = this.filters.find(( filter ) => {
 			return (
 				filter.field == field &&
 				filter.type == type &&
-				this.compareFilterValues( filter.value, value )
+				this._compareFilterValues( filter.value, value )
 			);
 		});
 
@@ -185,26 +185,6 @@ class State {
 
 	}
 
-	setDefault( passedDefaultParams = {} ) {
-
-		if ( typeof passedDefaultParams != 'object' ) {
-			throw new TypeError( '[SSAPI][State].setDefault - `passedDefaultParams` is not an object' );
-		}
-
-		this.defaultParams = { siteId: this.siteId, ...DEFAULT_PARAMS, ...passedDefaultParams };
-
-		return this;
-
-	}
-
-	lock() {
-
-		this.defaultParams = { ...this.params };
-
-		return this;
-
-	}
-
 	reset() {
 
 		this.params = { ...this.defaultParams };
@@ -223,12 +203,12 @@ class State {
 
 	};
 
-	output() {
+	get output() {
 
 		return {
 			...this.params,
-			...this.outputFilters(),
-			...this.outputSort()
+			...this._outputFilters(),
+			...this._outputSort()
 		};
 
 	}

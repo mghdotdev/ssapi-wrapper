@@ -10,7 +10,7 @@ class Client {
 	constructor( siteId, defaultSearchParams = {} ) {
 
 		if ( siteId == undefined ) {
-			throw new TypeError( '[SSAPI][Client] - `siteId` is undefined.' );
+			throw new TypeError( '[SSAPI][Client].constructor - `siteId` is undefined.' );
 		}
 
 		this.state = new State( siteId, defaultSearchParams );
@@ -23,17 +23,22 @@ class Client {
 
 	}
 
-	async search() {
+	search() {
 
-		const request = await new Request(
+		return new Request(
 			this.endpoint,
 			this.method,
-			this.state.output()
-		).send();
+			this.state.output
+		)
+		.send()
+		.then(( request ) => {
 
-		this.events[ EVENTS.SEARCH ]( request.response.data, request.response, request.requestParams );
+			// run callback
+			this.events[ EVENTS.SEARCH ]( request.response.data, request.response, request.requestParams );
 
-		return request;
+			return request;
+
+		});
 
 	}
 
@@ -44,6 +49,80 @@ class Client {
 		}
 
 		this.events[ event ] = callback;	
+
+	}
+
+	setState( state ) {
+
+		if ( state == undefined ) {
+			throw new TypeError( '[SSAPI][Client].setState - `state` is undefined.' );
+		}
+
+		const dynamicSetTests = [
+			{
+				pattern: /^sort\.(.*)$/,
+				fn: 'sort',
+				match: 1
+			},
+			{
+				pattern: /^filter\.(.*)$/,
+				fn: 'filter',
+				match: 1
+			},
+			{
+				pattern: /^bgfilter\.(.*)$/,
+				fn: 'backgroundFilter',
+				match: 1
+			}
+		];
+
+		for ( let prop in state ) {
+
+			let value = state[ prop ];
+
+			switch( prop ) {
+				case 'q': {
+					this.query( value );
+					break;
+				}
+				case 'resultsPerPage': {
+					this.perPage( value );
+					break;
+				}
+				case 'page': {
+					this.page( value );
+					break;
+				}
+				default: {
+
+					dynamicSetTests.some(( test ) => {
+						const match = prop.match( test.pattern );
+						if ( match ) {
+
+							if ( Array.isArray( value ) ) {
+								value.map(( filterValue ) => {
+
+									this[ test.fn ]( match[ test.match ], filterValue );
+
+								});
+							}
+							else {
+
+								this[ test.fn ]( match[ test.match ], value );
+
+							}
+
+							return true;
+
+						}
+					});
+
+				}
+			}
+
+		}
+
+		return this;
 
 	}
 
@@ -58,22 +137,6 @@ class Client {
 	clearFacets() {
 
 		this.state.clearFacets();
-
-		return this;
-
-	}
-
-	setDefault( defaultParams ) {
-
-		this.state.setDefault( defaultParams );
-
-		return this;
-
-	}
-
-	lock() {
-
-		this.state.lock();
 
 		return this;
 
@@ -103,21 +166,25 @@ class Client {
 
 	}
 
-	filter( field, value ) {
+	filter( field, value, resetPage = true ) {
 
-		this.state
-			.page( 1 )
-			.toggleFilter( field, value, false );
+		if ( resetPage ) {
+			this.state.page( 1 );
+		}
+
+		this.state.toggleFilter( field, value, false );
 
 		return this;
 
 	}
 
-	backgroundFilter( field, value ) {
+	backgroundFilter( field, value, resetPage = true ) {
 
-		this.state
-			.page( 1 )
-			.toggleFilter( field, value, true );
+		if ( resetPage ) {
+			this.state.page( 1 );
+		}
+
+		this.state.toggleFilter( field, value, true );
 
 		return this;
 
