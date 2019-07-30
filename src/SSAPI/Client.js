@@ -157,7 +157,11 @@ class Client {
 
 	}
 
-	clearFacets() {
+	clearFacets( resetPage = true ) {
+
+		if ( resetPage ) {
+			this.state.page( 1 );
+		}
 
 		this.state.clearFacets();
 
@@ -165,15 +169,19 @@ class Client {
 
 	}
 
-	clearFilters() {
+	clearFilters( resetPage ) {
 
-		this.state.clearFacets();
+		this.clearFacets( resetPage );
 
 		return this;
 
 	}
 
-	perPage( n ) {
+	perPage( n, resetPage = true ) {
+
+		if ( resetPage ) {
+			this.state.page( 1 );
+		}
 
 		this.state.perPage( n );
 
@@ -211,7 +219,7 @@ class Client {
 
 	facet( field, value, resetPage ) {
 
-		this.state.toggleFilter( field, value, false );
+		this.filter( field, value, false );
 
 		return this;
 
