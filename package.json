@@ -1,11 +1,16 @@
 {
 	"name": "ssapi-wrapper",
-	"version": "0.1.0",
+	"version": "0.1.1",
+	"description": "Just a SearchSpring API Wrapper for JavaScript client-side or NodeJS applications...",
 	"main": "./dist/ssapi-wrapper.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --config webpack.prod.js",
 		"start": "webpack-dev-server --config webpack.dev.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mghweb/ssapi-wrapper"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.1.2",
@@ -17,5 +22,7 @@
 		"webpack-dev-server": "^3.2.1",
 		"webpack-merge": "^4.2.1"
 	},
-	"dependencies": {}
+	"dependencies": {},
+	"author": "Max Hegler",
+	"license": "MIT"
 }

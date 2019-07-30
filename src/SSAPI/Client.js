@@ -95,20 +95,28 @@ class Client {
 				}
 				default: {
 
-					dynamicSetTests.some(( test ) => {
+					const testPassed = dynamicSetTests.some(( test ) => {
 						const match = prop.match( test.pattern );
 						if ( match ) {
 
 							if ( Array.isArray( value ) ) {
 								value.map(( filterValue ) => {
 
-									this[ test.fn ]( match[ test.match ], filterValue );
+									if ( filterValue != undefined ) {
+
+										this[ test.fn ]( match[ test.match ], filterValue );
+
+									}
 
 								});
 							}
 							else {
 
-								this[ test.fn ]( match[ test.match ], value );
+								if ( value != undefined ) {
+
+									this[ test.fn ]( match[ test.match ], value );
+
+								}
 
 							}
 
@@ -117,10 +125,25 @@ class Client {
 						}
 					});
 
+					if ( !testPassed ) {
+
+						this.other( prop, value );
+
+						break;
+					}
+
 				}
 			}
 
 		}
+
+		return this;
+
+	}
+
+	other( key, value ) {
+
+		this.state.other( key, value );
 
 		return this;
 
@@ -135,6 +158,14 @@ class Client {
 	}
 
 	clearFacets() {
+
+		this.state.clearFacets();
+
+		return this;
+
+	}
+
+	clearFilters() {
 
 		this.state.clearFacets();
 
@@ -178,6 +209,14 @@ class Client {
 
 	}
 
+	facet( field, value, resetPage ) {
+
+		this.state.toggleFilter( field, value, false );
+
+		return this;
+
+	}
+
 	backgroundFilter( field, value, resetPage = true ) {
 
 		if ( resetPage ) {
@@ -185,6 +224,14 @@ class Client {
 		}
 
 		this.state.toggleFilter( field, value, true );
+
+		return this;
+
+	}
+
+	backgroundFacet( field, value, resetPage ) {
+
+		this.backgroundFilter( field, value, resetPage );
 
 		return this;
 

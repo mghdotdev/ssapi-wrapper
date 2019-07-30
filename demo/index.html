@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>SSAPI Demo</title>
+
+	<style>
+
+		* {
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		a {
+			color: blue;
+			text-transform: underline;
+			cursor: pointer;
+		}
+		
+		.red {
+			color: red;
+		}
+
+		.row {
+			display: -webkit-flex;
+			display: -moz-flex;
+			display: -ms-flex;
+			display: -o-flex;
+			display: flex;
+			-webkit-flex-flow: row wrap;
+			-moz-flex-flow: row wrap;
+			-ms-flex-flow: row wrap;
+			-o-flex-flow: row wrap;
+			flex-flow: row wrap;
+		}
+
+		.col {
+			-webkit-flex: 0 0 auto;
+			-moz-flex: 0 0 auto;
+			-ms-flex: 0 0 auto;
+			-o-flex: 0 0 auto;
+			flex: 0 0 auto;
+
+			border: 1px solid;
+			margin: 0 0.5rem 1rem 0.5rem;
+			padding: 0.5rem;
+		}
+
+		img {
+			max-height: 50px;
+		}
+
+	</style>
+
+</head>
+<body>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js" integrity="sha256-23hi0Ag650tclABdGCdMNSjxvikytyQ44vYGo9HyOrU=" crossorigin="anonymous"></script>
+	<script defer src="../dist/ssapi-wrapper.js"></script>
+	<script defer src="./demo.js"></script>
+
+	<div ng-app="SSAPI_Demo" ng-controller="SSAPI_Demo_Controller">
+
+		<h2>Search:</h2>
+		<form ng-submit="ss.query( formData.query ).search()">
+			<input type="text" ng-model="formData.query" />
+			<button>Go</button>
+		</form>
+
+		<h2>Filters:</h2>
+		<a ng-if="data.filterSummary.length > 0" ng-click="ss.clearFacets().search();">Clear Facets</a>
+		<div class="row">
+			<div ng-repeat="facet in data.facets" class="col">
+				<h5>{{ facet.label }}</h5>
+				<div ng-if="facet.type == 'slider'">
+					<form class="row" ng-submit="ss.filter( facet.field, formData.ranges[ facet.field ] ).search();" ng-init="formData.ranges[ facet.field ] = formData.ranges[ facet.field ] || []">
+						<input class="col" type="number" ng-model="formData.ranges[ facet.field ][0]" placeholder="Low" />
+						<input class="col" type="number" ng-model="formData.ranges[ facet.field ][1]" placeholder="High" />
+						<button>Go</button>
+					</form>
+				</div>
+				<ul ng-if="facet.type != 'slider'">
+					<li ng-repeat="facetValue in facet.values">
+						<a ng-if="facetValue.type == 'range'" ng-click="ss.filter( facet.field, [ facetValue.low, facetValue.high ] ).search()">
+							<span ng-class="{ 'red': facetValue.active }">{{ facetValue.label }}</span>
+							({{ facetValue.count }})
+						</a>
+						<a ng-if="facetValue.type != 'range'" ng-click="ss.filter( facet.field, facetValue.value ).search()">
+							<span ng-class="{ 'red': facetValue.active }">{{ facetValue.label }}</span>
+							({{ facetValue.count }})
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<hr>
+
+		<h2>Sorting:</h2>
+		<ul>
+			<li ng-repeat="option in data.sorting.options">
+				<a ng-class="{ 'red': option.active }" ng-click="ss.sort( option.field, option.direction ).search( false )">{{ option.label }}</a>
+			</li>
+		</ul>
+
+		<hr>
+
+		<h2>Per Page:</h2>
+		<ul>
+			<li ng-repeat="n in [ 10, 20, 30 ]">
+				<a ng-class="{ 'red': ss.state.output.resultsPerPage == n }" ng-click="ss.perPage( n ).search( false )">{{ n }}</a>
+			</li>
+		</ul>
+
+		<hr>
+		
+		<h2>Results:</h2>
+		<div>Showing <strong>{{ data.pagination.end }}</strong> of <strong>{{ data.pagination.totalResults }}</strong></div>
+		<br>
+		<div class="row" ng-if="data.results.length > 0">
+			<arcicle ng-repeat="result in data.results" class="col">
+				<img ng-src="{{ result.imageUrl }}" alt="">
+				<div>
+					<a ng-href="{{ result.product_url }}">{{ result.name }}</a>
+					<strong>{{ result.price | currency }}</strong>
+				</div>
+			</arcicle>
+		</div>
+		<div ng-if="data.results.length == 0">
+			NO RESULTS!
+			<button ng-click="ss.reset().search();">Clear Filters</button>
+		</div>
+
+		<hr>
+
+		<h2>Pages:</h2>
+		<ul>
+			<li ng-repeat="page in data.pagination.pages">
+				<a ng-class="{ 'red': page == data.pagination.currentPage }" ng-click="ss.page( page ).search()">Page {{ page }}</a>
+			</li>
+		</ul>
+
+	</div>
+	
+</body>
+</html>

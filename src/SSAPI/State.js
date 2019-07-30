@@ -197,11 +197,21 @@ class State {
 
 	clearFacets() {
 
-		this.filters = [];
+		this.filters = this.filters.filter(( filter ) => {
+			return !( filter.type == 'filter' );
+		});
 
 		return this;
 
 	};
+
+	other( key, value ) {
+
+		this.params[ key ] = value;
+
+		return this;
+
+	}
 
 	get output() {
 
