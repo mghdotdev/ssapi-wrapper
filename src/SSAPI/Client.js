@@ -237,7 +237,11 @@ class Client {
 
 	}
 
-	query( q ) {
+	query( q, resetPage = true ) {
+
+		if ( resetPage ) {
+			this.state.page( 1 );
+		}
 
 		this.state.query( q );
 
