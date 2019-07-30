@@ -7,19 +7,20 @@ const EVENTS = {
 
 class Client {
 
-	constructor( siteId, defaultSearchParams = {} ) {
+	constructor( siteId, defaultSearchParams = {}, debug = false ) {
 
 		if ( siteId == undefined ) {
 			throw new TypeError( '[SSAPI][Client].constructor - `siteId` is undefined.' );
 		}
 
-		this.state = new State( siteId, defaultSearchParams );
+		this.state = new State( siteId, defaultSearchParams, debug );
 
 		this.endpoint = 'https://api.searchspring.net/api/search/search.json';
 		this.method = 'GET';
 		this.events = {
 			[ EVENTS.SEARCH ]: () => {}
 		};
+		this.debug = debug;
 
 	}
 
@@ -198,6 +199,8 @@ class Client {
 	}
 
 	sort( field, direction ) {
+
+		if ( this.debug ) console.trace( `[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }` );
 
 		this.state.sort( field, direction );
 

@@ -4,13 +4,14 @@ const DEFAULT_PARAMS = {
 
 class State {
 
-	constructor( siteId, passedDefaultParams = {} ) {
+	constructor( siteId, passedDefaultParams = {}, debug = false ) {
 
 		this.siteId = siteId;
 		this.defaultParams = { siteId: this.siteId, ...DEFAULT_PARAMS, ...passedDefaultParams };
 		this.params = { ...this.defaultParams };
 		this.filters = [];
 		this.sorting = {};
+		this.debug = debug;
 
 	}
 
