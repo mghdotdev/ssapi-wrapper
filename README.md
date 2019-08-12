@@ -13,14 +13,18 @@ npm i --save ssapi-wrapper
 ```
 import * as SSAPI from 'ssapi-wrapper'
 
+// define new client
 const api = new SSAPI.Client( 'siteId', { resultsPerPage: 10 } );
 
+// define callback for the "search" event
 api.on( 'search', ( data ) => { console.log( data ); } );
 
+// execute functions and trigger search
 api
-    .query( 'shirts' )
+    .query( 'shirts' ) // methods can be chained in sequence to modify the state
     .sort( 'price', 'asc' )
-    .filter( 'size', '10 Feet' )
+    .filter( 'size', 'Small' )
+    .filter( 'color', 'Red' )
     .page( 2 )
-    .search();
+    .search(); // the request will only be sent once the `search` method is called
 ```
