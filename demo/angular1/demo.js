@@ -5,7 +5,7 @@
 	ngModule.controller('SSAPI_Demo_Controller', function( $scope, $location ) {
 
 		// define searchspring api client
-		$scope.ss = new SSAPI.Client( 'your_site_id', { resultsPerPage: 10, 'sort.relevance': 'desc' } );
+		$scope.ss = new SSAPI.Client( __CONFIG__.siteId, { resultsPerPage: 10, 'sort.relevance': 'desc' } );
 		$scope.ss.setState( $location.search() );
 
 		// define range filter model holder
