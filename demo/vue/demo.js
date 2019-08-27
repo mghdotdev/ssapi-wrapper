@@ -6,6 +6,24 @@
 		// expose to proto
 		Vue.prototype.$searchSpringClient = new SSAPI.Client( options.siteId, options.defaultParams );
 
+		// default params
+		Vue.prototype.searchData = {};
+
+		// mixin default stuff
+		Vue.mixin({
+			created: function() {
+
+				var vm = this;
+
+				vm.$searchSpringClient.on('search', function( data ) {
+
+					vm.searchData = data;
+
+				});
+
+			}
+		})
+
 	};
 
 	Vue.use(
@@ -28,23 +46,12 @@
 					searchData: {}
 				}
 			},
-			mounted: function() {
-
-				var vm = this;
-
-				vm.$root.$on( 'ss-search', function( searchPayload ) {
-
-					vm.searchData = searchPayload.response.data;
-
-				});
-
-			},
 			template: `
-				<ul>
+				<ol>
 					<li v-for="result in searchData.results">
 						{{ result.name }}
 					</li>
-				</ul>
+				</ol>
 			`
 		}
 	);
@@ -64,12 +71,7 @@
 
 					vm.$searchSpringClient
 						.query( this.query )
-						.search()
-						.then(function( searchPayload ) {
-
-							vm.$root.$emit( 'ss-search', searchPayload );
-
-						});
+						.search();
 
 				}
 			},
@@ -84,11 +86,41 @@
 		}
 	);
 
+	Vue.component(
+		'search-per-page',
+		{
+			data: function() {
+				return {
+					perPage: [
+						20,
+						30,
+						40,
+						500
+					],
+					selectedPerPage: 20
+				}
+			},
+			watch: {
+				selectedPerPage: function( value ) {
+
+					this.$searchSpringClient
+						.perPage( value )
+						.search();
+
+				}
+			},
+			template: `
+				<div>
+					<select v-model="selectedPerPage">
+						<option v-for="n in perPage" :value="n">{{ n }}</option>
+					</select>
+				</div>
+			`
+		}
+	);
+
 	var SearchApp = new Vue({
 		el: '#SearchApp'
 	});
 
-	
-
-
-})()
+})();
