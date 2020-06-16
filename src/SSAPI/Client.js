@@ -1,6 +1,7 @@
 import State from './State'
 import Request from './Request'
 import 'custom-event-polyfill'
+
 class Client {
 
 	constructor( siteId, defaultSearchParams = {}, debug = false ) {
@@ -12,11 +13,15 @@ class Client {
 		this.state = new State( siteId, defaultSearchParams, debug );
 
 		this.endpoint = 'https://api.searchspring.net/api/search/search.json';
+
 		this.method = 'GET';
-		this.events = {
-			SEARCH: 'search'
-		};
+
+		this.events = [
+			'search'
+		];
+
 		this.bus = document.createElement( 'div' );
+
 		this.debug = debug;
 
 	}
@@ -32,7 +37,7 @@ class Client {
 		.then(( request ) => {
 
 			// dispatch SEARCH event
-			this.bus.dispatchEvent( new CustomEvent( this.events.SEARCH, { detail: request } ) );
+			this.bus.dispatchEvent( new CustomEvent( 'search', { detail: request } ) );
 
 			return request;
 
@@ -42,7 +47,7 @@ class Client {
 
 	on( event, callback ) {
 
-		if ( typeof this.events[ event ] != 'function' ) {
+		if ( this.events.indexOf( event ) === -1 ) {
 			throw new Error( `[SSAPI][Client].on - Event "${ event }" does not exist.` );
 		}
 
@@ -52,7 +57,7 @@ class Client {
 	
 	off( event, callback ) {
 		
-		if ( typeof this.events[ event ] != 'function' ) {
+		if ( this.events.indexOf( event ) === -1 ) {
 			throw new Error( `[SSAPI][Client].off - Event "${ event }" does not exist.` );
 		}
 
