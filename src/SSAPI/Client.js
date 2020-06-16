@@ -36,8 +36,8 @@ class Client {
 		.send()
 		.then(( request ) => {
 
-			// dispatch SEARCH event
-			this.bus.dispatchEvent( new CustomEvent( 'search', { detail: request } ) );
+			// dispatch SEARCH event; pass request data
+			this.bus.dispatchEvent( new CustomEvent( 'search', { detail: request.data } ) );
 
 			return request;
 
