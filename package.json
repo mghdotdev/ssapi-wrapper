@@ -8,7 +8,8 @@
 		"build": "webpack --config webpack.prod.js",
 		"start": "webpack-dev-server --config webpack.dev.js",
 		"preversion": "npm run build",
-		"version": "git add ."
+		"version": "git add .",
+		"postpublish": "git push && git push --tags"
 	},
 	"repository": {
 		"type": "git",
