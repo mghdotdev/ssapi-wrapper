@@ -95,11 +95,11 @@ class Client {
 
 			switch( prop ) {
 				case 'q': {
-					this.query( value );
+					this.query( value, false );
 					break;
 				}
 				case 'resultsPerPage': {
-					this.perPage( value );
+					this.perPage( value, false );
 					break;
 				}
 				case 'page': {
@@ -117,7 +117,7 @@ class Client {
 
 									if ( filterValue != undefined ) {
 
-										this[ test.fn ]( match[ test.match ], filterValue );
+										this[ test.fn ]( match[ test.match ], filterValue, false );
 
 									}
 
@@ -127,7 +127,7 @@ class Client {
 
 								if ( value != undefined ) {
 
-									this[ test.fn ]( match[ test.match ], value );
+									this[ test.fn ]( match[ test.match ], value, false );
 
 								}
 
@@ -234,7 +234,7 @@ class Client {
 
 	facet( field, value, resetPage ) {
 
-		this.filter( field, value, false );
+		this.filter( field, value, resetPage );
 
 		return this;
 

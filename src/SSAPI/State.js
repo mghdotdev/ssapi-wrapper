@@ -43,11 +43,16 @@ class State {
 			let keyRoot = `${ filter.type }.${ filter.field }`;
 
 			if ( Array.isArray( filter.value ) ) {
+
+				let lowKey = `${ keyRoot }.low`;
+				let highKey = `${ keyRoot }.high`;
+
 				return {
 					...output,
-					...(filter.value[0] != undefined && { [ `${ keyRoot }.low` ]: filter.value[0] }),
-					...(filter.value[1] != undefined && { [ `${ keyRoot }.high` ]: filter.value[1] })
-				};
+					...(filter.value[0] != undefined && { [ lowKey ]: ( Array.isArray( output[ lowKey ] ) ? output[ lowKey ].concat( [ filter.value[0] ] ) : [ filter.value[0] ] ) }),
+					...(filter.value[1] != undefined && { [ highKey ]: ( Array.isArray( output[ highKey ] ) ? output[ highKey ].concat( [ filter.value[1] ] ) : [ filter.value[1] ] ) })
+				}
+
 			}
 			else {
 				output[ keyRoot ] = output[ keyRoot ] || [];
