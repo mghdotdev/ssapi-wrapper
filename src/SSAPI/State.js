@@ -12,6 +12,7 @@ class State {
 		this.filters = [];
 		this.sorting = {};
 		this.debug = debug;
+		this.lockedState = {};
 
 	}
 
@@ -191,11 +192,23 @@ class State {
 
 	}
 
+	lock() {
+
+		this.lockedState = {
+			params: { ...this.params },
+			filters: [ ...this.filters ],
+			sorting: { ...this.sorting }
+		};
+
+		return this;
+
+	};
+
 	reset() {
 
-		this.params = { ...this.defaultParams };
-		this.filters = [];
-		this.sorting = {};
+		this.params = ( this.lockedState.params ) ? { ...this.lockedState.params } : { ...this.defaultParams };
+		this.filters = ( this.lockedState.filters ) ? [ ...this.lockedState.filters ] : [];
+		this.sorting = ( this.lockedState.sorting ) ? { ...this.lockedState.sorting } : {};
 
 		return this;
 

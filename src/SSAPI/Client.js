@@ -170,6 +170,14 @@ class Client {
 
 	}
 
+	lock() {
+
+		this.state.lock();
+
+		return this;
+		
+	}
+
 	clearFacets( resetPage = true ) {
 
 		if ( resetPage ) {
