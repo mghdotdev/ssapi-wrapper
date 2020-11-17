@@ -24,6 +24,8 @@ class Client {
 
 		this.debug = debug;
 
+		this.stateSetFromFunction = false;
+
 	}
 
 	search() {
@@ -39,6 +41,25 @@ class Client {
 			// dispatch SEARCH event; pass request data
 			this.bus.dispatchEvent( new CustomEvent( 'search', { detail: request } ) );
 
+			// fix state for first response after state set from function
+			if ( this.stateSetFromFunction ) {
+
+				this.stateSetFromFunction = false;
+
+				// reset filters
+				this.state.filters = this.state.filters.filter( filter => filter.type === 'bgfilter' );
+
+				// re-add filters to the state from the summary
+				if ( request.response.data && request.response.data.filterSummary && request.response.data.filterSummary.length > 0 ) {
+
+					request.response.data.filterSummary.map(filter => {
+						this.filter( filter.field, ( typeof filter.value === 'object' ) ? [ filter.value.rangeLow, filter.value.rangeHigh ] : filter.value );
+					});
+
+				}
+
+			}
+			
 			return request;
 
 		});
@@ -149,6 +170,8 @@ class Client {
 			}
 
 		}
+
+		this.stateSetFromFunction = true;
 
 		return this;
 
