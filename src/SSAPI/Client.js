@@ -12,7 +12,7 @@ class Client {
 
 		this.state = new State( siteId, defaultSearchParams, debug );
 
-		this.endpoint = 'https://api.searchspring.net/api/search/search.json';
+		this.endpoint = `https://${siteId}.a.searchspring.io/api/search/search.json`;
 
 		this.method = 'GET';
 
