@@ -1,5 +1,5 @@
 import qs from 'qs'
-import RequestCache from './RequestCache'
+import {RequestCache} from './RequestCache'
 
 const DONE = 4;
 const OK = 200;
@@ -82,6 +82,8 @@ class Request {
 
 	}
 
-}
+};
 
-export default Request
+export {
+	Request
+};

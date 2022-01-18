@@ -2,7 +2,7 @@ const DEFAULT_PARAMS = {
 	resultsFormat: 'native'
 };
 
-class State {
+class SearchState {
 
 	constructor( siteId, passedDefaultParams = {}, debug = false ) {
 
@@ -242,7 +242,8 @@ class State {
 
 	}
 
-}
+};
 
-
-export default State
+export {
+	SearchState
+};

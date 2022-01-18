@@ -1,22 +1,30 @@
-import State from './State'
-import Request from './Request'
+import {SearchState} from './SearchState'
+import {AutocompleteState} from './AutocompleteState';
+import {Request} from './Request'
 import 'custom-event-polyfill'
 
 class Client {
 
-	constructor( siteId, defaultSearchParams = {}, debug = false ) {
+	constructor( siteId, defaultSearchParams = {}, defaultAutocompleteParams = {}, debug = false ) {
 
 		if ( siteId == undefined ) {
 			throw new TypeError( '[SSAPI][Client].constructor - `siteId` is undefined.' );
 		}
 
-		this.state = new State( siteId, defaultSearchParams, debug );
+		this.states = {
+			autocomplete: new AutocompleteState( siteId, defaultAutocompleteParams, debug ),
+			search: new SearchState( siteId, defaultSearchParams, debug )
+		}
 
-		this.endpoint = `https://${siteId}.a.searchspring.io/api/search/search.json`;
+		this.endpoints = {
+			autocomplete: `https://${siteId}.a.searchspring.io/api/suggest/query`,
+			search: `https://${siteId}.a.searchspring.io/api/search/search.json`
+		}
 
 		this.method = 'GET';
 
 		this.events = [
+			'autocomplete',
 			'search'
 		];
 
@@ -31,9 +39,9 @@ class Client {
 	search() {
 
 		return new Request(
-			this.endpoint,
+			this.endpoints.search,
 			this.method,
-			this.state.output
+			this.states.search.output
 		)
 		.send()
 		.then(( request ) => {
@@ -41,24 +49,26 @@ class Client {
 			// dispatch SEARCH event; pass request data
 			this.bus.dispatchEvent( new CustomEvent( 'search', { detail: request } ) );
 
-			// fix state for first response after state set from function
-			if ( this.stateSetFromFunction ) {
+			this.afterSearch(request);
+			
+			return request;
 
-				this.stateSetFromFunction = false;
+		});
 
-				// reset filters
-				this.state.filters = this.state.filters.filter( filter => filter.type === 'bgfilter' );
+	}
 
-				// re-add filters to the state from the summary
-				if ( request.response.data && request.response.data.filterSummary && request.response.data.filterSummary.length > 0 ) {
+	autocomplete () {
 
-					request.response.data.filterSummary.map(filter => {
-						this.filter( filter.field, ( typeof filter.value === 'object' ) ? [ filter.value.rangeLow, filter.value.rangeHigh ] : filter.value );
-					});
+		return new Request(
+			this.endpoints.autocomplete,
+			this.method,
+			this.states.autocomplete.output
+		)
+		.send()
+		.then(( request ) => {
 
-				}
-
-			}
+			// dispatch AUTOCOMPLETE event; pass request data
+			this.bus.dispatchEvent( new CustomEvent( 'autocomplete', { detail: request } ) );
 			
 			return request;
 
@@ -84,6 +94,27 @@ class Client {
 
 		this.bus.removeEventListener( event, callback, false );
 
+	}
+
+	afterSearch (request) {
+		// fix state for first response after state set from function
+		if ( this.stateSetFromFunction ) {
+
+			this.stateSetFromFunction = false;
+
+			// reset filters
+			this.states.search.filters = this.states.search.filters.filter( filter => filter.type === 'bgfilter' );
+
+			// re-add filters to the state from the summary
+			if ( request.response.data && request.response.data.filterSummary && request.response.data.filterSummary.length > 0 ) {
+
+				request.response.data.filterSummary.map(filter => {
+					this.filter( filter.field, ( typeof filter.value === 'object' ) ? [ filter.value.rangeLow, filter.value.rangeHigh ] : filter.value );
+				});
+
+			}
+
+		}
 	}
 
 	setState( state ) {
@@ -179,7 +210,7 @@ class Client {
 
 	other( key, value ) {
 
-		this.state.other( key, value );
+		this.states.search.other( key, value );
 
 		return this;
 
@@ -187,7 +218,7 @@ class Client {
 
 	reset() {
 
-		this.state.reset();
+		this.states.search.reset();
 
 		return this;
 
@@ -195,7 +226,7 @@ class Client {
 
 	lock() {
 
-		this.state.lock();
+		this.states.search.lock();
 
 		return this;
 		
@@ -204,10 +235,10 @@ class Client {
 	clearFacets( resetPage = true ) {
 
 		if ( resetPage ) {
-			this.state.page( 1 );
+			this.states.search.page( 1 );
 		}
 
-		this.state.clearFacets();
+		this.states.search.clearFacets();
 
 		return this;
 
@@ -224,10 +255,10 @@ class Client {
 	perPage( n, resetPage = true ) {
 
 		if ( resetPage ) {
-			this.state.page( 1 );
+			this.states.search.page( 1 );
 		}
 
-		this.state.perPage( n );
+		this.states.search.perPage( n );
 
 		return this;
 
@@ -235,7 +266,7 @@ class Client {
 
 	page( n ) {
 
-		this.state.page( n );
+		this.states.search.page( n );
 
 		return this;
 
@@ -245,7 +276,7 @@ class Client {
 
 		if ( this.debug ) console.trace( `[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }` );
 
-		this.state.sort( field, direction );
+		this.states.search.sort( field, direction );
 
 		return this;
 
@@ -254,10 +285,10 @@ class Client {
 	filter( field, value, resetPage = true ) {
 
 		if ( resetPage ) {
-			this.state.page( 1 );
+			this.states.search.page( 1 );
 		}
 
-		this.state.toggleFilter( field, value, false );
+		this.states.search.toggleFilter( field, value, false );
 
 		return this;
 
@@ -274,10 +305,10 @@ class Client {
 	backgroundFilter( field, value, resetPage = true ) {
 
 		if ( resetPage ) {
-			this.state.page( 1 );
+			this.states.search.page( 1 );
 		}
 
-		this.state.toggleFilter( field, value, true );
+		this.states.search.toggleFilter( field, value, true );
 
 		return this;
 
@@ -294,14 +325,17 @@ class Client {
 	query( q, resetPage = true ) {
 
 		if ( resetPage ) {
-			this.state.page( 1 );
+			this.states.search.page( 1 );
 		}
 
-		this.state.query( q );
+		this.states.search.query( q );
+		this.states.autocomplete.query( q );
 
 		return this;
 	}
 
-}
+};
 
-export default Client
+export {
+	Client
+};

@@ -1,4 +1,4 @@
-import Client from './SSAPI/Client.js'
+import {Client} from './SSAPI/Client.js'
 
 // static methods
 const createPages = ( pagination ) => {
