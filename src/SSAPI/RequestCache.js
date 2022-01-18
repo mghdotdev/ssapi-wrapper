@@ -54,6 +54,8 @@ class RequestCache {
 
 	}
 
-}
+};
 
-export default RequestCache
+export {
+	RequestCache
+};
