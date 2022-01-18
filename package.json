@@ -1,6 +1,6 @@
 {
 	"name": "ssapi-wrapper",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "Just a SearchSpring API Wrapper for JavaScript client-side or NodeJS applications...",
 	"main": "./dist/ssapi-wrapper.js",
 	"scripts": {
@@ -17,6 +17,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.12.3",
+		"@babel/plugin-proposal-optional-chaining": "^7.16.7",
 		"@babel/preset-env": "^7.12.1",
 		"babel-loader": "^8.2.1",
 		"uglifyjs-webpack-plugin": "^2.2.0",

@@ -34,6 +34,8 @@ class Client {
 
 		this.stateSetFromFunction = false;
 
+		this.suggestedQuery = null;
+
 	}
 
 	search() {
@@ -66,6 +68,9 @@ class Client {
 		)
 		.send()
 		.then(( request ) => {
+
+			// Store suggested query from autocomplete response
+			this.suggestedQuery = request?.response?.data?.suggested?.text;
 
 			// dispatch AUTOCOMPLETE event; pass request data
 			this.bus.dispatchEvent( new CustomEvent( 'autocomplete', { detail: request } ) );
