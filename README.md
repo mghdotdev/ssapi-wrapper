@@ -4,16 +4,16 @@ Just a SearchSpring API Wrapper for JavaScript client-side or NodeJS application
 
 ## Install
 
-### npm
-
-```
-npm i ssapi-wrapper
-```
-
 ### pnpm
 
 ```
 pnpm add ssapi-wrapper
+```
+
+### npm
+
+```
+npm i ssapi-wrapper
 ```
 
 ## Usage
