@@ -16,15 +16,15 @@ class Client {
 		}
 
 		this.endpoints = {
-			autocomplete: `https://snapi.kube.searchspring.io/api/v1/autocomplete`,
-			search: `https://snapi.kube.searchspring.io/api/v1/search`
+			autocomplete: 'https://snapi.kube.searchspring.io/api/v1/autocomplete',
+			search: 'https://snapi.kube.searchspring.io/api/v1/search',
+			meta: 'https://snapi.kube.searchspring.io/api/v1/meta'
 		}
-
-		this.method = 'POST';
 
 		this.events = [
 			'autocomplete',
-			'search'
+			'search',
+			'meta'
 		];
 
 		this.bus = document.createElement('div');
@@ -39,7 +39,6 @@ class Client {
 	search() {
 		return new Request(
 			this.endpoints.search,
-			this.method,
 			this.states.search.output
 		)
 		.send()
@@ -56,12 +55,10 @@ class Client {
 	autocomplete () {
 		return new Request(
 			this.endpoints.autocomplete,
-			this.method,
 			this.states.autocomplete.output
 		)
 		.send()
 		.then((request) => {
-
 			// Store suggested query from autocomplete response
 			this.suggestedQuery = request?.response?.data?.suggested?.text;
 
@@ -71,6 +68,22 @@ class Client {
 			return request;
 		});
 
+	}
+
+	meta () {
+		return new Request(
+			this.endpoints.meta,
+			{
+				siteId: this.siteId
+			}
+		)
+		.send()
+		.then(request => {
+			// dispatch META event; pass request data
+			this.bus.dispatchEvent(new CustomEvent('meta', { defail: request }));
+
+			return request;
+		});
 	}
 
 	on(event, callback) {
