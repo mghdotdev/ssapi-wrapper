@@ -267,13 +267,24 @@ class Client {
 		return this;
 	}
 
-	query ({query, subQuery, originalQuery, redirectResponse}, resetPage = true) {
+	query (queryOrSearch, resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
+		
+		const search = typeof queryOrSearch === 'string'
+			? {
+				query: queryOrSearch
+			}
+			: {
+				query: queryOrSearch.query,
+				subQuery: queryOrSearch.subQuery,
+				originalQuery: queryOrSearch.originalQuery,
+				redirectResponse: queryOrSearch.redirectResponse
+			};
 
-		this.states.search.query(query, subQuery, originalQuery, redirectResponse);
-		this.states.autocomplete.query(query, subQuery, originalQuery, redirectResponse);
+		this.states.search.query(search.query, search.subQuery, search.originalQuery, search.redirectResponse);
+		this.states.autocomplete.query(search.query, search.subQuery, search.originalQuery, search.redirectResponse);
 
 		return this;
 	}
