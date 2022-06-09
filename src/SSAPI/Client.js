@@ -1,11 +1,11 @@
-import {SearchState} from './SearchState'
+import {SearchState} from './SearchState';
 import {AutocompleteState} from './AutocompleteState';
-import {Request} from './Request'
-import 'custom-event-polyfill'
+import {Request} from './Request';
+import 'custom-event-polyfill';
 
 class Client {
 
-	constructor(siteId, defaultSearchParams = {}, defaultAutocompleteParams = {}, debug = false) {
+	constructor (siteId, defaultSearchParams = {}, defaultAutocompleteParams = {}, debug = false) {
 		if (siteId == undefined) {
 			throw new TypeError('[SSAPI][Client].constructor - `siteId` is undefined.');
 		}
@@ -32,11 +32,9 @@ class Client {
 		this.debug = debug;
 
 		this.stateSetFromFunction = false;
-
-		this.suggestedQuery = null;
 	}
 
-	search() {
+	search () {
 		return new Request(
 			this.endpoints.search,
 			this.states.search.output
@@ -86,7 +84,7 @@ class Client {
 		});
 	}
 
-	on(event, callback) {
+	on (event, callback) {
 		if (this.events.indexOf(event) === -1) {
 			throw new Error(`[SSAPI][Client].on - Event "${ event }" does not exist.`);
 		}
@@ -94,7 +92,7 @@ class Client {
 		this.bus.addEventListener(event, callback, false);
 	}
 	
-	off(event, callback) {
+	off (event, callback) {
 		if (this.events.indexOf(event) === -1) {
 			throw new Error(`[SSAPI][Client].off - Event "${ event }" does not exist.`);
 		}
@@ -104,7 +102,7 @@ class Client {
 
 	afterSearch (request) {
 		// fix state for first response after state set from function
-		if (this.stateSetFromFunction) {
+		/* if (this.stateSetFromFunction) {
 
 			this.stateSetFromFunction = false;
 
@@ -120,10 +118,10 @@ class Client {
 
 			}
 
-		}
+		} */
 	}
 
-	setState(state) {
+	setState (state) {
 		if (state == undefined) {
 			throw new TypeError('[SSAPI][Client].setState - `state` is undefined.');
 		}
@@ -154,7 +152,7 @@ class Client {
 					this.query(value, false);
 					break;
 				}
-				case 'resultsPerPage': {
+				case 'perPage': {
 					this.perPage(value, false);
 					break;
 				}
@@ -197,25 +195,25 @@ class Client {
 		return this;
 	}
 
-	other(key, value) {
+	other (key, value) {
 		this.states.search.other(key, value);
 
 		return this;
 	}
 
-	reset() {
+	reset () {
 		this.states.search.reset();
 
 		return this;
 	}
 
-	lock() {
+	lock () {
 		this.states.search.lock();
 
 		return this;	
 	}
 
-	clearFacets(resetPage = true) {
+	clearFilters (resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
@@ -225,13 +223,7 @@ class Client {
 		return this;
 	}
 
-	clearFilters(resetPage) {
-		this.clearFacets(resetPage);
-
-		return this;
-	}
-
-	perPage(n, resetPage = true) {
+	perPage (n, resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
@@ -241,13 +233,13 @@ class Client {
 		return this;
 	}
 
-	page(n) {
+	page (n) {
 		this.states.search.page(n);
 
 		return this;
 	}
 
-	sort(field, direction) {
+	sort (field, direction) {
 		if (this.debug) console.trace(`[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }`);
 
 		this.states.search.sort(field, direction);
@@ -255,7 +247,7 @@ class Client {
 		return this;
 	}
 
-	filter(field, value, resetPage = true) {
+	filter (field, value, resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
@@ -265,13 +257,7 @@ class Client {
 		return this;
 	}
 
-	facet(field, value, resetPage) {
-		this.filter(field, value, resetPage);
-
-		return this;
-	}
-
-	backgroundFilter(field, value, resetPage = true) {
+	backgroundFilter (field, value, resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
@@ -281,19 +267,13 @@ class Client {
 		return this;
 	}
 
-	backgroundFacet(field, value, resetPage) {
-		this.backgroundFilter(field, value, resetPage);
-
-		return this;
-	}
-
-	query(q, resetPage = true) {
+	query ({query, subQuery, originalQuery, redirectResponse}, resetPage = true) {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
 
-		this.states.search.query(q);
-		this.states.autocomplete.query(q);
+		this.states.search.query(query, subQuery, originalQuery, redirectResponse);
+		this.states.autocomplete.query(query, subQuery, originalQuery, redirectResponse);
 
 		return this;
 	}
