@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"custom-event-polyfill": "^1.0.7",
-		"qs": "^6.9.4"
+		"object-hash": "^3.0.0"
 	},
 	"author": "Max Hegler",
 	"license": "MIT",
