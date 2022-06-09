@@ -1,32 +1,22 @@
-const DEFAULT_PARAMS = {
-	disableSpellCorrect: true,
-	limit: 4
-};
+import {SearchState} from './SearchState';
 
-class AutocompleteState {
-
-	constructor( pubId, passedDefaultParams = {}, debug = false ) {
-		this.pubId = pubId;
-		this.defaultParams = { pubId: this.pubId, ...DEFAULT_PARAMS, ...passedDefaultParams };
-		this.params = { ...this.defaultParams };
-		this.debug = debug;
+export class AutocompleteState extends SearchState {
+	
+	static DEFAULT_STATE = {
+		...SearchState.DEFAULT_STATE,
+		suggestions: {
+			count: 5
+		}
 	}
 
-	query( query ) {
-		this.params.query = query;
+	constructor() {
+		super(...arguments);
+	}
+
+	suggestionCount (count) {
+		this.state.suggestion.count = count;
+
 		return this;
 	}
 
-	get output() {
-
-		return {
-			...this.params
-		};
-
-	}
-
-};
-
-export {
-	AutocompleteState
 };
