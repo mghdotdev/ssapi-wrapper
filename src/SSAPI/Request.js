@@ -1,5 +1,5 @@
 import hash from 'object-hash';
-import {RequestCache} from './RequestCache'
+import {RequestCache} from './RequestCache';
 
 const DONE = 4;
 const OK = 200;
