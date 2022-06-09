@@ -15,9 +15,11 @@
 
 				var vm = this;
 
-				vm.$searchSpringClient.on('search', function( data ) {
+				vm.$searchSpringClient.on('search', function( e ) {
 
-					vm.searchData = data;
+					vm.searchData = e.detail.response.data;
+
+					console.log(vm.searchData);
 
 				});
 
@@ -31,7 +33,9 @@
 		{
 			siteId: __CONFIG__.siteId, 
 			defaultParams: {
-				resultsPerPage: 25
+				pagination: {
+					pageSize: 20
+				}
 			}
 		}
 	);
@@ -49,7 +53,7 @@
 			template: `
 				<ol>
 					<li v-for="result in searchData.results">
-						{{ result.name }}
+						{{ result.mappings.core.name }}
 					</li>
 				</ol>
 			`

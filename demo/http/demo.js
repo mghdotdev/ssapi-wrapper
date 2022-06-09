@@ -29,9 +29,6 @@
 
 		console.log('autocomplete', e.detail);
 
-		// logic here
-		client.search();
-
 	});
 
 	// search callback
