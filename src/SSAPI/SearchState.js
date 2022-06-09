@@ -50,11 +50,11 @@ export class SearchState {
 	constructor (siteId, passedDefaultParams = {}, debug = false) {
 		this.siteId = siteId;
 		this.defaultState = {
-			...DEFAULT_STATE,
+			...this.constructor.DEFAULT_STATE,
 			...passedDefaultParams,
 			siteId: siteId
 		};
-		this.site = {...this.defaultState};
+		this.state = {...this.defaultState};
 		this.debug = debug;
 		this.lockedState = null;
 	}
