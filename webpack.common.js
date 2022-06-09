@@ -21,7 +21,10 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						plugins: ['@babel/plugin-proposal-optional-chaining'],
+						plugins: [
+							'@babel/plugin-proposal-optional-chaining',
+							'@babel/plugin-proposal-class-properties'
+						],
 						presets: [['@babel/preset-env']]
 					}
 				}
