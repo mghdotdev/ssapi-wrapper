@@ -1,7 +1,7 @@
 export class SearchState {
 
 	static REDIRECT_RESPONSE = {
-		DEFAULT: '',
+		DEFAULT: 'direct',
 		DIRECT: 'direct',
 		FULL: 'full',
 		MINIMAL: 'minimal'
@@ -150,7 +150,7 @@ export class SearchState {
 			: this.addFilter(field, value, backgroundFilter);
 	}
 
-	query (query, subQuery = null, originalQuery = null, redirectResponse = null) {
+	query (query, subQuery = '', originalQuery = '', redirectResponse = this.constructor.REDIRECT_RESPONSE.DEFAULT) {
 		this.state.search = {
 			...this.state.search,
 			query: {
