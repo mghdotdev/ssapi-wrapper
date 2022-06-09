@@ -1,4 +1,4 @@
-class SearchState {
+export class SearchState {
 
 	static REDIRECT_RESPONSE = {
 		DEFAULT: '',
@@ -231,8 +231,4 @@ class SearchState {
 		return this.state;
 	}
 
-};
-
-export {
-	SearchState
 };
