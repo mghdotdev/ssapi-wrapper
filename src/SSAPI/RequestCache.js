@@ -1,57 +1,45 @@
 class RequestCache {
 
-	constructor( throttleTime = 1000 ) {
-
+	constructor(throttleTime = 1000) {
 		this.store = new Map();
 		this.throttleTime = throttleTime;
-
 	}
 
-	access( key ) {
+	access (key) {
+		const record = this.store.get(key);
 
-		const record = this.store.get( key );
-
-		if ( record ) {
-
+		if (record) {
 			const now = Date.now();
 			
-			if ( record.timestamp - now > this.throttleTime ) {
-				return this.remove( key );
+			if (record.timestamp - now > this.throttleTime) {
+				return this.remove(key);
 			}
 
 			return record.data;
-
 		}
 
 		return null;
-
 	}
 
-	insert( key, value ) {
-
+	insert (key, value) {
 		const record = {
 			timestamp: Date.now(),
 			data: value
 		};
 
-		this.store.set( key, record );
+		this.store.set(key, record);
 
 		return true;
-
 	}
 
-	purge() {
-
+	purge () {
 		this.store.clear();
 
 		return true;
-
 	}
 
-	remove( key ) {
-
-		return this.store.delete( key );
-
+	remove (key) {
+		return this.store.delete(key);
 	}
 
 };
