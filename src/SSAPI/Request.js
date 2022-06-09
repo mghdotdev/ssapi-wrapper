@@ -8,36 +8,27 @@ const cache = new RequestCache(30000);
 
 class Request {
 
-	constructor (endpoint, method, params) {
+	constructor (endpoint, payload) {
 		this.endpoint = endpoint;
-		this.method = method;
-		this.params = params;
-	}
-
-	serializeParams (params) {
-		return qs.stringify(params, { arrayFormat: 'repeat' })
-	}
-
-	buildUrl (endpoint, params) {
-		if (endpoint.indexOf('?') > -1) {
-			return `${ endpoint }${ params }`;
-		}
-		else {
-			return `${ endpoint }?${ params }`;
-		}
+		this.payload = payload;
 	}
 
 	send () {
 		return new Promise((resolve, reject) => {
-			const cacheResponse = cache.access(url);
+			const cacheKey = hash(this.payload);
+			const cacheResponse = cache.access(cacheKey);
+
 			if (cacheResponse != undefined) {
 				return resolve(cacheResponse);
 			}
 
 			const xhr = new XMLHttpRequest();
-			xhr.open(this.method, url);
+			xhr.open('POST', this.endpoint);
+			xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 			xhr.responseType = 'json';
-			xhr.send();
+			xhr.send(
+				JSON.stringify(this.payload)
+			);
 
 			xhr.onreadystatechange = () => {
 				if (xhr.readyState == DONE) {
@@ -53,7 +44,7 @@ class Request {
 							requestQueryString: queryString
 						};
 
-						cache.insert(url, returnObject);
+						cache.insert(cacheKey, returnObject);
 
 						resolve(returnObject);
 					}
