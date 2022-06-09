@@ -40,8 +40,7 @@ class Request {
 								responseType: xhr.responseType,
 								data: (typeof xhr.response == 'object') ? xhr.response : JSON.parse(xhr.response)
 							},
-							requestParams: { ...this.params },
-							requestQueryString: queryString
+							requestPayload: this.payload
 						};
 
 						cache.insert(cacheKey, returnObject);
