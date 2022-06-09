@@ -1,245 +1,234 @@
-const DEFAULT_PARAMS = {
-	resultsFormat: 'native'
-};
-
 class SearchState {
 
-	constructor( siteId, passedDefaultParams = {}, debug = false ) {
+	static REDIRECT_RESPONSE = {
+		DEFAULT: '',
+		DIRECT: 'direct',
+		FULL: 'full',
+		MINIMAL: 'minimal'
+	};
 
-		this.siteId = siteId;
-		this.defaultParams = { siteId: this.siteId, ...DEFAULT_PARAMS, ...passedDefaultParams };
-		this.params = { ...this.defaultParams };
-		this.filters = [];
-		this.sorting = {};
-		this.debug = debug;
-		this.lockedState = {};
+	static SORT_DIRECTION = {
+		DEFAULT: 'asc',
+		ASC: 'asc',
+		DESC: 'desc'
+	};
 
-	}
-
-	_compareFilterRanges( range1, range2 ) {
-		return ( range1[ 0 ] == range2[ 0 ] && range1[ 1 ] == range2[ 1 ] );
-	}
-
-	_compareFilterValues( value1, value2 ) {
-
-		const arrayCheck1 = Array.isArray( value1 );
-		const arrayCheck2 = Array.isArray( value2 );
-
-		if ( arrayCheck1 && arrayCheck2 ) {
-			return this._compareFilterRanges( value1, value2 );
+	static DEFAULT_STATE = {
+		siteId: '',
+		sorts: [],
+		search: {
+			query: {
+				string: '',
+				spellCorrection: false
+			},
+			subQuery: '',
+			originalQuery: '',
+			redirectResponse: ''
+		},
+		filters: [],
+		pagination: {
+			page: 1,
+			pageSize: 20
+		},
+		merchandising: {
+			disabled: false,
+			segments: [],
+			landingPage: ''
+		},
+		tracking: {
+			userId: '',
+			domain: ''
+		},
+		personalization: {
+			disabled: true,
+			cart: '',
+			lastViewed: '',
+			shopper: ''
 		}
-		else if ( arrayCheck1 || arrayCheck2 ) {
+	};
+
+	constructor (siteId, passedDefaultParams = {}, debug = false) {
+		this.siteId = siteId;
+		this.defaultState = {
+			...DEFAULT_STATE,
+			...passedDefaultParams,
+			siteId: siteId
+		};
+		this.site = {...this.defaultState};
+		this.debug = debug;
+		this.lockedState = null;
+	}
+
+	_compareFilterRanges (range1, range2) {
+		return (range1.low == range2.low && range1.high == range2.high);
+	}
+
+	_compareFilterValues (value1, value2) {
+		const rangeCheck1 = typeof value1 === 'object' && value1.hasOwnProperty('low') && value1.hasOwnProperty('high');
+		const rangeCheck2 = typeof value2 === 'object' && value2.hasOwnProperty('low') && value2.hasOwnProperty('high');
+
+		if (rangeCheck1 && rangeCheck2) {
+			return this._compareFilterRanges(value1, value2);
+		}
+		else if (rangeCheck1 || rangeCheck2) {
 			return false;
 		}
 		else {
-			return ( value1 == value2 );
+			return value1 == value2;
 		}
-
 	}
 
-	_outputFilters() {
-
-		return this.filters.reduce(( output, filter ) => {
-
-			let keyRoot = `${ filter.type }.${ filter.field }`;
-
-			if ( Array.isArray( filter.value ) ) {
-
-				let lowKey = `${ keyRoot }.low`;
-				let highKey = `${ keyRoot }.high`;
-
-				return {
-					...output,
-					...(filter.value[0] != undefined && { [ lowKey ]: ( Array.isArray( output[ lowKey ] ) ? output[ lowKey ].concat( [ filter.value[0] ] ) : [ filter.value[0] ] ) }),
-					...(filter.value[1] != undefined && { [ highKey ]: ( Array.isArray( output[ highKey ] ) ? output[ highKey ].concat( [ filter.value[1] ] ) : [ filter.value[1] ] ) })
-				}
-
-			}
-			else {
-				output[ keyRoot ] = output[ keyRoot ] || [];
-				output[ keyRoot ].push( filter.value );
-			}
-
-			return output;
-
-		}, {});
-
-	}
-
-	_outputSort() {
-
-		if ( this.sorting.field && this.sorting.direction ) {
-
-			return { [ `sort.${ this.sorting.field }` ]: this.sorting.direction };
-
+	addFilter (field, value, backgroundFilter = false) {
+		if (field == undefined) {
+			throw new TypeError('[SSAPI][State].addFilter - `field` is undefined.');
 		}
-
-		return;
-
-	}
-
-	_transformFilterType( backgroundFilter ) {
-		return ( backgroundFilter ) ?
-			'bgfilter' :
-			'filter';
-	}
-
-	addFilter( field, value, backgroundFilter = false ) {
-
-		if ( field == undefined ) {
-			throw new TypeError( '[SSAPI][State].addFilter - `field` is undefined.' );
-		}
-		if ( value == undefined ) {
-			throw new TypeError( '[SSAPI][State].addFilter - `value` is undefined.' );
+		if (value == undefined) {
+			throw new TypeError('[SSAPI][State].addFilter - `value` is undefined.');
 		}
 
 		const filter = {
 			field: field,
-			value: value,
-			type: this._transformFilterType( backgroundFilter )
-		};
+			background: !!backgroundFilter,
+			...Array.isArray(value)
+				? {
+					value: {
+						low: value[0],
+						high: value[0]
+					},
+					type: 'range'
+				}
+				: {
+					value,
+					type: 'value'
+				}
+		}
 
-		this.filters.push( filter );
+		this.filters.push(filter);
 
 		return this;
-
 	}
 
-	removeFilter( field, value, backgroundFilter = false ) {
-
-		if ( field == undefined ) {
-			throw new TypeError( '[SSAPI][State].removeFilter - `field` is undefined.' );
+	removeFilter (field, value, backgroundFilter = false) {
+		if (field == undefined) {
+			throw new TypeError('[SSAPI][State].removeFilter - `field` is undefined.');
 		}
-		if ( value == undefined ) {
-			throw new TypeError( '[SSAPI][State].removeFilter - `value` is undefined.' );
+		if (value == undefined) {
+			throw new TypeError('[SSAPI][State].removeFilter - `value` is undefined.');
 		}
 
-		const type = this._transformFilterType( backgroundFilter );
-
-		this.filters = this.filters.filter(( filter ) => {
+		this.filters = this.filters.filter(filter => {
 			return !(
 				filter.field == field &&
+				filter.background == backgroundFilter &&
 				filter.type == type &&
-				this._compareFilterValues( filter.value, value )
+				this._compareFilterValues(filter.value, value)
 			);
 		});
 
 		return this;
-
 	}
 
-	toggleFilter( field, value, backgroundFilter = false ) {
-
-		if ( field == undefined ) {
-			throw new TypeError( '[SSAPI][State].toggleFilter - `field` is undefined.' );
+	toggleFilter(field, value, backgroundFilter = false) {
+		if (field == undefined) {
+			throw new TypeError('[SSAPI][State].toggleFilter - `field` is undefined.');
 		}
-		if ( value == undefined ) {
-			throw new TypeError( '[SSAPI][State].toggleFilter - `value` is undefined.' );
+		if (value == undefined) {
+			throw new TypeError('[SSAPI][State].toggleFilter - `value` is undefined.');
 		}
 
-		const type = this._transformFilterType( backgroundFilter );
-
-		const foundFilter = this.filters.find(( filter ) => {
+		const foundFilter = this.filters.find((filter) => {
 			return (
 				filter.field == field &&
+				filter.background == backgroundFilter &&
 				filter.type == type &&
-				this._compareFilterValues( filter.value, value )
+				this._compareFilterValues(filter.value, value)
 			);
 		});
 
-		if ( foundFilter ) {
-			return this.removeFilter( field, value, backgroundFilter );
+		return foundFilter
+			? this.removeFilter(field, value, backgroundFilter)
+			: this.addFilter(field, value, backgroundFilter);
+	}
+
+	query (query, subQuery = null, originalQuery = null, redirectResponse = null) {
+		this.state.search = {
+			...this.state.search,
+			query: {
+				string: query,
+				spellCorrection: !!originalQuery
+					? true
+					: false
+			},
+			subQuery,
+			originalQuery,
+			redirectResponse
+		};
+
+		return this;
+	}
+
+	perPage (n) {
+		this.state.pagination.pageSize = n;
+
+		return this;
+	}
+
+	page (n) {
+		this.state.pagination.page = n;
+
+		return this;
+	}
+
+	sort (field, direction = this.constructor.SORT_DIRECTION.DEFAULT) {
+		if (field == undefined) {
+			throw new TypeError('[SSAPI][State].sort - "field" is undefined.');
 		}
-		else {
-			return this.addFilter( field, value, backgroundFilter );
-		}
 
-	}
-
-	query( q ) {
-
-		this.params.q = q;
-
-		return this;
-
-	}
-
-	perPage( n ) {
-
-		this.params.resultsPerPage = n;
+		// Only support single sorting
+		this.sorts = [
+			{
+				field: field,
+				direction: direction
+			}
+		];
 
 		return this;
-
 	}
 
-	page( n ) {
-
-		this.params.page = n;
-
-		return this;
-
-	}
-
-	sort( field, direction = 'asc' ) {
-
-		if ( field == undefined ) {
-			throw new TypeError( '[SSAPI][State].sort - "field" is undefined.' );
-		}
-
-		this.sorting = { field: field, direction: direction };
-
-		return this;
-
-	}
-
-	lock() {
-
+	lock () {
 		this.lockedState = {
-			params: { ...this.params },
-			filters: [ ...this.filters ],
-			sorting: { ...this.sorting }
+			...this.state
 		};
 
 		return this;
-
 	};
 
-	reset() {
-
-		this.params = ( this.lockedState.params ) ? { ...this.lockedState.params } : { ...this.defaultParams };
-		this.filters = ( this.lockedState.filters ) ? [ ...this.lockedState.filters ] : [];
-		this.sorting = ( this.lockedState.sorting ) ? { ...this.lockedState.sorting } : {};
+	reset () {
+		this.state = this.lockedState
+			? {
+				...this.lockedState
+			}
+			: {
+				...this.defaultState
+			};
 
 		return this;
-
 	}
 
-	clearFacets() {
-
-		this.filters = this.filters.filter(( filter ) => {
-			return !( filter.type == 'filter' );
-		});
+	clearFilters () {
+		this.filters = this.filters.filter(filter => !filter.background);
 
 		return this;
-
 	};
 
-	other( key, value ) {
-
-		this.params[ key ] = value;
+	other (key, value) {
+		this.state[key] = value;
 
 		return this;
-
 	}
 
-	get output() {
-
-		return {
-			...this.params,
-			...this._outputFilters(),
-			...this._outputSort()
-		};
-
+	get output () {
+		return this.state;
 	}
 
 };
