@@ -80,7 +80,7 @@ class Client {
 		.send()
 		.then(request => {
 			// dispatch META event; pass request data
-			this.bus.dispatchEvent(new CustomEvent('meta', { defail: request }));
+			this.bus.dispatchEvent(new CustomEvent('meta', { detail: request }));
 
 			return request;
 		});
