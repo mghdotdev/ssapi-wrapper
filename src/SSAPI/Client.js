@@ -2,6 +2,7 @@
 import {SearchState} from './SearchState';
 import {AutocompleteState} from './AutocompleteState';
 import {Request} from './Request';
+import {QueryParamTransformer} from './QueryParamTransformer';
 import 'custom-event-polyfill';
 
 export class Client {
@@ -35,10 +36,15 @@ export class Client {
 		this.stateSetFromFunction = false;
 	}
 
+	get searchQuery () {
+		return this.states.search.state.search.query;
+	}
+
 	search () {
 		return new Request(
 			this.endpoints.search,
-			this.states.search.output
+			this.states.search.output,
+			QueryParamTransformer.to(this.states.search.output, this.states.search.defaultState)
 		)
 			.send()
 			.then((request) => {
@@ -58,8 +64,8 @@ export class Client {
 		)
 			.send()
 			.then((request) => {
-			// Store suggested query from autocomplete response
-				this.suggestedQuery = request?.response?.data?.suggested?.text;
+				// Store suggested query from autocomplete response
+				// this.suggestedQuery = request?.response?.data?.suggested?.text;
 
 				// Dispatch AUTOCOMPLETE event; pass request data
 				this.bus.dispatchEvent(new CustomEvent('autocomplete', {detail: request}));
@@ -124,76 +130,14 @@ export class Client {
 		 */
 	}
 
-	setState (state) {
-		if (state == undefined) {
-			throw new TypeError('[SSAPI][Client].setState - `state` is undefined.');
-		}
-
-		const dynamicSetTests = [
-			{
-				pattern: /^sort\.(.*)$/,
-				fn: 'sort',
-				match: 1
-			},
-			{
-				pattern: /^filter\.(.*)$/,
-				fn: 'filter',
-				match: 1
-			},
-			{
-				pattern: /^bgfilter\.(.*)$/,
-				fn: 'backgroundFilter',
-				match: 1
-			}
-		];
-
-		for (let prop in state) {
-			let value = state[prop];
-
-			switch (prop) {
-				case 'q': {
-					this.query(value, false);
-					break;
-				}
-				case 'perPage': {
-					this.perPage(value, false);
-					break;
-				}
-				case 'page': {
-					this.page(value);
-					break;
-				}
-				default: {
-					const testPassed = dynamicSetTests.some((test) => {
-						const match = prop.match(test.pattern);
-						if (match) {
-							if (Array.isArray(value)) {
-								value.map((filterValue) => {
-									if (filterValue != undefined) {
-										this[test.fn](match[test.match], filterValue, false);
-									}
-								});
-							}
-							else if (value != undefined) {
-								this[test.fn](match[test.match], value, false);
-							}
-
-							return true;
-						}
-					});
-
-					if (!testPassed) {
-						this.other(prop, value);
-
-						break;
-					}
-				}
-			}
-		}
-
-		this.stateSetFromFunction = true;
+	fromQueryParams (urlQueryParams) {
+		QueryParamTransformer.from(urlQueryParams, this);
 
 		return this;
+	}
+
+	toQueryParams () {
+		return QueryParamTransformer.to(this.states.search.state);
 	}
 
 	other (key, value) {

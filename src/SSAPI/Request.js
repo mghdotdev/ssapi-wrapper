@@ -8,9 +8,10 @@ const cache = new RequestCache(30000);
 
 export class Request {
 
-	constructor (endpoint, payload) {
+	constructor (endpoint, payload, queryParams = {}) {
 		this.endpoint = endpoint;
 		this.payload = payload;
+		this.queryParams = queryParams;
 	}
 
 	send () {
@@ -40,7 +41,8 @@ export class Request {
 								responseType: xhr.responseType,
 								data: (typeof xhr.response == 'object') ? xhr.response : JSON.parse(xhr.response)
 							},
-							requestPayload: this.payload
+							requestPayload: this.payload,
+							requestQueryParams: this.queryParams
 						};
 
 						cache.insert(cacheKey, returnObject);
