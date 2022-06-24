@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {SearchState} from './SearchState';
 import {AutocompleteState} from './AutocompleteState';
 import {Request} from './Request';
@@ -6,7 +7,7 @@ import 'custom-event-polyfill';
 class Client {
 
 	constructor (siteId, defaultSearchParams = {}, defaultAutocompleteParams = {}, debug = false) {
-		if (siteId == undefined) {
+		if (siteId === void 0 || siteId === null) {
 			throw new TypeError('[SSAPI][Client].constructor - `siteId` is undefined.');
 		}
 
@@ -17,8 +18,8 @@ class Client {
 
 		this.endpoints = {
 			autocomplete: 'https://snapi.kube.searchspring.io/api/v1/autocomplete',
-			search: 'https://snapi.kube.searchspring.io/api/v1/search',
-			meta: 'https://snapi.kube.searchspring.io/api/v1/meta'
+			meta: 'https://snapi.kube.searchspring.io/api/v1/meta',
+			search: 'https://snapi.kube.searchspring.io/api/v1/search'
 		};
 
 		this.events = [
@@ -240,7 +241,9 @@ class Client {
 	}
 
 	sort (field, direction) {
-		if (this.debug) { console.trace(`[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }`); }
+		if (this.debug) {
+			console.trace(`[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }`);
+		}
 
 		this.states.search.sort(field, direction);
 
@@ -277,10 +280,10 @@ class Client {
 				query: queryOrSearch
 			}
 			: {
-				query: queryOrSearch.query,
-				subQuery: queryOrSearch.subQuery,
 				originalQuery: queryOrSearch.originalQuery,
-				redirectResponse: queryOrSearch.redirectResponse
+				query: queryOrSearch.query,
+				redirectResponse: queryOrSearch.redirectResponse,
+				subQuery: queryOrSearch.subQuery
 			};
 
 		this.states.search.query(search.query, search.subQuery, search.originalQuery, search.redirectResponse);
