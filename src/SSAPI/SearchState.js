@@ -36,7 +36,7 @@ export class SearchState {
 				spellCorrection: false,
 				string: ''
 			},
-			redirectResponse: '',
+			redirectResponse: SearchState.REDIRECT_RESPONSE.DEFAULT,
 			subQuery: ''
 		},
 		siteId: '',
