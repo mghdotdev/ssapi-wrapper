@@ -1,7 +1,7 @@
 import {SearchState} from './SearchState';
 
 export class AutocompleteState extends SearchState {
-	
+
 	static DEFAULT_STATE = {
 		...SearchState.DEFAULT_STATE,
 		suggestions: {
@@ -9,7 +9,7 @@ export class AutocompleteState extends SearchState {
 		}
 	}
 
-	constructor() {
+	constructor () {
 		super(...arguments);
 	}
 

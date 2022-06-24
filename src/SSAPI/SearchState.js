@@ -8,42 +8,42 @@ export class SearchState {
 	};
 
 	static SORT_DIRECTION = {
-		DEFAULT: 'asc',
 		ASC: 'asc',
+		DEFAULT: 'asc',
 		DESC: 'desc'
 	};
 
 	static DEFAULT_STATE = {
-		siteId: '',
-		sorts: [],
-		search: {
-			query: {
-				string: '',
-				spellCorrection: false
-			},
-			subQuery: '',
-			originalQuery: '',
-			redirectResponse: ''
-		},
 		filters: [],
+		merchandising: {
+			disabled: false,
+			landingPage: '',
+			segments: []
+		},
 		pagination: {
 			page: 1,
 			pageSize: 20
 		},
-		merchandising: {
-			disabled: false,
-			segments: [],
-			landingPage: ''
-		},
-		tracking: {
-			userId: '',
-			domain: ''
-		},
 		personalization: {
-			disabled: true,
 			cart: '',
+			disabled: true,
 			lastViewed: '',
 			shopper: ''
+		},
+		search: {
+			originalQuery: '',
+			query: {
+				spellCorrection: false,
+				string: ''
+			},
+			redirectResponse: '',
+			subQuery: ''
+		},
+		siteId: '',
+		sorts: [],
+		tracking: {
+			domain: '',
+			userId: ''
 		}
 	};
 
@@ -60,7 +60,7 @@ export class SearchState {
 	}
 
 	_compareFilterRanges (range1, range2) {
-		return (range1.low == range2.low && range1.high == range2.high);
+		return range1.low === range2.low && range1.high === range2.high;
 	}
 
 	_compareFilterValues (value1, value2) {
@@ -73,54 +73,60 @@ export class SearchState {
 		else if (rangeCheck1 || rangeCheck2) {
 			return false;
 		}
-		else {
-			return value1 == value2;
-		}
+
+		return value1 === value2;
+
 	}
 
 	addFilter (field, value, backgroundFilter = false) {
-		if (field == undefined) {
+		if (field === void 0 || field === null) {
 			throw new TypeError('[SSAPI][State].addFilter - `field` is undefined.');
 		}
-		if (value == undefined) {
+		if (value === void 0 || value === null) {
 			throw new TypeError('[SSAPI][State].addFilter - `value` is undefined.');
 		}
 
 		const filter = {
+			background: Boolean(backgroundFilter),
 			field: field,
-			background: !!backgroundFilter,
 			...Array.isArray(value)
 				? {
+					type: 'range',
 					value: {
-						low: value[0],
-						high: value[0]
-					},
-					type: 'range'
+						high: value[0],
+						low: value[0]
+					}
 				}
 				: {
-					value,
-					type: 'value'
+					type: 'value',
+					value
 				}
-		}
+		};
 
 		this.filters.push(filter);
 
 		return this;
 	}
 
+	determineFilterTypeFromValue (value) {
+		return Array.isArray(value)
+			? 'range'
+			: 'value';
+	}
+
 	removeFilter (field, value, backgroundFilter = false) {
-		if (field == undefined) {
+		if (field === void 0 || field === null) {
 			throw new TypeError('[SSAPI][State].removeFilter - `field` is undefined.');
 		}
-		if (value == undefined) {
+		if (value === void 0 || value === null) {
 			throw new TypeError('[SSAPI][State].removeFilter - `value` is undefined.');
 		}
 
 		this.filters = this.filters.filter(filter => {
 			return !(
-				filter.field == field &&
-				filter.background == backgroundFilter &&
-				filter.type == type &&
+				filter.field === field &&
+				filter.background === backgroundFilter &&
+				filter.type === this.determineFilterTypeFromValue(value) &&
 				this._compareFilterValues(filter.value, value)
 			);
 		});
@@ -128,19 +134,19 @@ export class SearchState {
 		return this;
 	}
 
-	toggleFilter(field, value, backgroundFilter = false) {
-		if (field == undefined) {
+	toggleFilter (field, value, backgroundFilter = false) {
+		if (field === void 0 || field === null) {
 			throw new TypeError('[SSAPI][State].toggleFilter - `field` is undefined.');
 		}
-		if (value == undefined) {
+		if (value === void 0 || value === null) {
 			throw new TypeError('[SSAPI][State].toggleFilter - `value` is undefined.');
 		}
 
 		const foundFilter = this.filters.find((filter) => {
 			return (
-				filter.field == field &&
-				filter.background == backgroundFilter &&
-				filter.type == type &&
+				filter.field === field &&
+				filter.background === backgroundFilter &&
+				filter.type === this.determineFilterTypeFromValue(value) &&
 				this._compareFilterValues(filter.value, value)
 			);
 		});
@@ -153,15 +159,13 @@ export class SearchState {
 	query (query, subQuery = '', originalQuery = '', redirectResponse = this.constructor.REDIRECT_RESPONSE.DEFAULT) {
 		this.state.search = {
 			...this.state.search,
-			query: {
-				string: query,
-				spellCorrection: !!originalQuery
-					? true
-					: false
-			},
-			subQuery,
 			originalQuery,
-			redirectResponse
+			query: {
+				spellCorrection: Boolean(originalQuery),
+				string: query
+			},
+			redirectResponse,
+			subQuery
 		};
 
 		return this;
@@ -180,15 +184,15 @@ export class SearchState {
 	}
 
 	sort (field, direction = this.constructor.SORT_DIRECTION.DEFAULT) {
-		if (field == undefined) {
+		if (field === void 0 || field === null) {
 			throw new TypeError('[SSAPI][State].sort - "field" is undefined.');
 		}
 
 		// Only support single sorting
 		this.sorts = [
 			{
-				field: field,
-				direction: direction
+				direction: direction,
+				field: field
 			}
 		];
 
