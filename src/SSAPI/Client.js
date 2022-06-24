@@ -292,5 +292,14 @@ export class Client {
 		return this;
 	}
 
+	landingPage (landingPageOrSearchTag) {
+		this.states.search.merchandising({
+			disabled: false,
+			landingPage: landingPageOrSearchTag
+		});
+
+		return this;
+	}
+
 };
 

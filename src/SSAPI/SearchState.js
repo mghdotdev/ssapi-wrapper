@@ -225,6 +225,14 @@ export class SearchState {
 		return this;
 	};
 
+	merchandising ({disabled, landingPage, segments} = {}) {
+		this.state.merchandising = {
+			disabled: disabled ?? this.state.merchandising.disabled,
+			landingPage: landingPage ?? this.state.merchandising.landingPage,
+			segments: segments ?? this.state.merchandising.segments
+		};
+	}
+
 	other (key, value) {
 		this.state[key] = value;
 
