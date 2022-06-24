@@ -4,7 +4,7 @@ import {AutocompleteState} from './AutocompleteState';
 import {Request} from './Request';
 import 'custom-event-polyfill';
 
-class Client {
+export class Client {
 
 	constructor (siteId, defaultSearchParams = {}, defaultAutocompleteParams = {}, debug = false) {
 		if (siteId === void 0 || siteId === null) {
@@ -294,6 +294,3 @@ class Client {
 
 };
 
-export {
-	Client
-};

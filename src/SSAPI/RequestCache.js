@@ -1,6 +1,6 @@
-class RequestCache {
+export class RequestCache {
 
-	constructor(throttleTime = 1000) {
+	constructor (throttleTime = 1000) {
 		this.store = new Map();
 		this.throttleTime = throttleTime;
 	}
@@ -10,7 +10,7 @@ class RequestCache {
 
 		if (record) {
 			const now = Date.now();
-			
+
 			if (record.timestamp - now > this.throttleTime) {
 				return this.remove(key);
 			}
@@ -23,8 +23,8 @@ class RequestCache {
 
 	insert (key, value) {
 		const record = {
-			timestamp: Date.now(),
-			data: value
+			data: value,
+			timestamp: Date.now()
 		};
 
 		this.store.set(key, record);
@@ -44,6 +44,3 @@ class RequestCache {
 
 };
 
-export {
-	RequestCache
-};

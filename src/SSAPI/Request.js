@@ -6,7 +6,7 @@ const OK = 200;
 
 const cache = new RequestCache(30000);
 
-class Request {
+export class Request {
 
 	constructor (endpoint, payload) {
 		this.endpoint = endpoint;
@@ -56,8 +56,4 @@ class Request {
 			};
 		});
 	}
-};
-
-export {
-	Request
 };
