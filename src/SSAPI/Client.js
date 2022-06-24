@@ -13,13 +13,13 @@ class Client {
 		this.states = {
 			autocomplete: new AutocompleteState(siteId, defaultAutocompleteParams, debug),
 			search: new SearchState(siteId, defaultSearchParams, debug)
-		}
+		};
 
 		this.endpoints = {
 			autocomplete: 'https://snapi.kube.searchspring.io/api/v1/autocomplete',
 			search: 'https://snapi.kube.searchspring.io/api/v1/search',
 			meta: 'https://snapi.kube.searchspring.io/api/v1/meta'
-		}
+		};
 
 		this.events = [
 			'autocomplete',
@@ -39,15 +39,15 @@ class Client {
 			this.endpoints.search,
 			this.states.search.output
 		)
-		.send()
-		.then((request) => {
-			// dispatch SEARCH event; pass request data
-			this.bus.dispatchEvent(new CustomEvent('search', { detail: request }));
+			.send()
+			.then((request) => {
+			// Dispatch SEARCH event; pass request data
+				this.bus.dispatchEvent(new CustomEvent('search', {detail: request}));
 
-			this.afterSearch(request);
-			
-			return request;
-		});
+				this.afterSearch(request);
+
+				return request;
+			});
 	}
 
 	autocomplete () {
@@ -55,16 +55,16 @@ class Client {
 			this.endpoints.autocomplete,
 			this.states.autocomplete.output
 		)
-		.send()
-		.then((request) => {
+			.send()
+			.then((request) => {
 			// Store suggested query from autocomplete response
-			this.suggestedQuery = request?.response?.data?.suggested?.text;
+				this.suggestedQuery = request?.response?.data?.suggested?.text;
 
-			// dispatch AUTOCOMPLETE event; pass request data
-			this.bus.dispatchEvent(new CustomEvent('autocomplete', { detail: request }));
-			
-			return request;
-		});
+				// Dispatch AUTOCOMPLETE event; pass request data
+				this.bus.dispatchEvent(new CustomEvent('autocomplete', {detail: request}));
+
+				return request;
+			});
 
 	}
 
@@ -75,13 +75,13 @@ class Client {
 				siteId: this.siteId
 			}
 		)
-		.send()
-		.then(request => {
-			// dispatch META event; pass request data
-			this.bus.dispatchEvent(new CustomEvent('meta', { detail: request }));
+			.send()
+			.then(request => {
+			// Dispatch META event; pass request data
+				this.bus.dispatchEvent(new CustomEvent('meta', {detail: request}));
 
-			return request;
-		});
+				return request;
+			});
 	}
 
 	on (event, callback) {
@@ -91,7 +91,7 @@ class Client {
 
 		this.bus.addEventListener(event, callback, false);
 	}
-	
+
 	off (event, callback) {
 		if (this.events.indexOf(event) === -1) {
 			throw new Error(`[SSAPI][Client].off - Event "${ event }" does not exist.`);
@@ -101,24 +101,26 @@ class Client {
 	}
 
 	afterSearch (request) {
-		// fix state for first response after state set from function
-		/* if (this.stateSetFromFunction) {
-
-			this.stateSetFromFunction = false;
-
-			// reset filters
-			this.states.search.filters = this.states.search.filters.filter(filter => filter.type === 'bgfilter');
-
-			// re-add filters to the state from the summary
-			if (request.response.data && request.response.data.filterSummary && request.response.data.filterSummary.length > 0) {
-
-				request.response.data.filterSummary.map(filter => {
-					this.filter(filter.field, (typeof filter.value === 'object') ? [ filter.value.rangeLow, filter.value.rangeHigh ] : filter.value);
-				});
-
-			}
-
-		} */
+		// Fix state for first response after state set from function
+		/*
+		 * If (this.stateSetFromFunction) {
+		 *
+		 * this.stateSetFromFunction = false;
+		 *
+		 * // reset filters
+		 * this.states.search.filters = this.states.search.filters.filter(filter => filter.type === 'bgfilter');
+		 *
+		 * // re-add filters to the state from the summary
+		 * if (request.response.data && request.response.data.filterSummary && request.response.data.filterSummary.length > 0) {
+		 *
+		 * request.response.data.filterSummary.map(filter => {
+		 * this.filter(filter.field, (typeof filter.value === 'object') ? [ filter.value.rangeLow, filter.value.rangeHigh ] : filter.value);
+		 * });
+		 *
+		 * }
+		 *
+		 * }
+		 */
 	}
 
 	setState (state) {
@@ -145,9 +147,9 @@ class Client {
 		];
 
 		for (let prop in state) {
-			let value = state[ prop ];
+			let value = state[prop];
 
-			switch(prop) {
+			switch (prop) {
 				case 'q': {
 					this.query(value, false);
 					break;
@@ -167,14 +169,12 @@ class Client {
 							if (Array.isArray(value)) {
 								value.map((filterValue) => {
 									if (filterValue != undefined) {
-										this[ test.fn ](match[ test.match ], filterValue, false);
+										this[test.fn](match[test.match], filterValue, false);
 									}
 								});
 							}
-							else {
-								if (value != undefined) {
-									this[ test.fn ](match[ test.match ], value, false);
-								}
+							else if (value != undefined) {
+								this[test.fn](match[test.match], value, false);
 							}
 
 							return true;
@@ -210,7 +210,7 @@ class Client {
 	lock () {
 		this.states.search.lock();
 
-		return this;	
+		return this;
 	}
 
 	clearFilters (resetPage = true) {
@@ -240,7 +240,7 @@ class Client {
 	}
 
 	sort (field, direction) {
-		if (this.debug) console.trace(`[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }`);
+		if (this.debug) { console.trace(`[SSAPI][Client].sort - field: ${ field } | direction: ${ direction }`); }
 
 		this.states.search.sort(field, direction);
 
@@ -271,7 +271,7 @@ class Client {
 		if (resetPage) {
 			this.states.search.page(1);
 		}
-		
+
 		const search = typeof queryOrSearch === 'string'
 			? {
 				query: queryOrSearch
